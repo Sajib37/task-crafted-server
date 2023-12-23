@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 })
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.f30vajg.mongodb.net/?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, {
@@ -64,6 +64,35 @@ async function run() {
       const email = req.params.email;
       const query = { email: email };
       const result = await taskCollection.find(query).toArray();
+      res.send(result)
+    })
+
+    // update a task
+    app.put("/tasks/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const updateTask = req.body;
+      const option ={upsert : true}
+      
+      const task = {
+        $set: {
+          title: updateTask.title,
+          description: updateTask.description,
+          deadline: updateTask.deadline,
+          priority: updateTask.priority,
+          status: updateTask.status,
+          email: updateTask.email,
+        }
+      }
+      const result = await taskCollection.updateOne(filter, task, option)
+      
+      res.send(result)
+    })
+
+    app.delete("/tasks/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await taskCollection.deleteOne(query)
       res.send(result)
     })
 
