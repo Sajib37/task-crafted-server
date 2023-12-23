@@ -29,7 +29,8 @@ async function run() {
   try {
     
       // all collections are here
-      const userCollection = client.db("taskCrafted").collection("users")
+    const userCollection = client.db("taskCrafted").collection("users")
+    const taskCollection = client.db("taskCrafted").collection("tasks")
 
       app.post("/users", async (req, res) => {
           const newUser = req.body;
@@ -52,6 +53,19 @@ async function run() {
           const result = await userCollection.findOne(query)
           res.send(result)
       })
+    
+    app.post("/tasks", async (req, res) => {
+      const newTask = req.body;
+      const result = await taskCollection.insertOne(newTask);
+      res.send(result)
+    })
+
+    app.get("/tasks/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await taskCollection.find(query).toArray();
+      res.send(result)
+    })
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   }
